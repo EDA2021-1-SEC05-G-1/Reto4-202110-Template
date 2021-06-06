@@ -28,6 +28,7 @@
 import config
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
+from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
@@ -55,26 +56,112 @@ def newAnalyzer():
     """
     try:
         analyzer = {
-                    'landing_points': None,
+                    'landingPoints': None,
+                    'countries': None,
                     'connections': None,
-                    'components': None,
-                    'paths': None
                     }
 
-        analyzer['landing_points'] = m.newMap(numelements=14000,
+        analyzer['landingPoints'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
-                                     comparefunction=compareStopIds)
+                                     comparefunction=compareIds)
+        
+        analyzer['countries'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareIds)
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
                                               size=14000,
-                                              comparefunction=compareStopIds)
+                                              comparefunction=compareIds)
+
+        analyzer['connectionsLst'] = lt.newList()
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:newAnalyzer')
 
 
-# Funciones para agregar informacion al grafo
+def addLandingPoint(analyzer, landingPoint):
+    """
+    Agrega un landingPoint
+    """
+    country = landingPoint['name'].split(',')[-1]
+    entry = m.get(analyzer['countries'],country[1:])
+    landingPoint['country'] = country[1:]
+    if entry is not None:
+        country = me.getValue(entry)
+        lt.addLast(country['landingPoints'], landingPoint)
+        # if(country['CapitalLatitude'] == landingPoint['latitude'] and country['CapitalLongitude'] == landingPoint['longitude']):
+        #     print('test')
+    m.put(analyzer['landingPoints'], landingPoint['landing_point_id'], landingPoint) 
+    addVertex(analyzer,landingPoint['landing_point_id'])
+    return analyzer
+
+def addVertex(analyzer, landingPointId):
+    """
+    Adiciona una estación como un vertice del grafo
+    """
+    try:
+        if not gr.containsVertex(analyzer['connections'], landingPointId):
+            gr.insertVertex(analyzer['connections'], landingPointId)
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:addstop')
+
+def addCountry(analyzer, country):
+    """
+    Agrega un landingPoint
+    """
+    country['landingPoints']= lt.newList('ARRAY_LIST')
+    m.put(analyzer['countries'], country['CountryName'], country) 
+    return analyzer
+
+def addConection(analyzer, connection):
+    """
+    Agrega un landingPoint
+    """
+    lt.addLast(analyzer['connectionsLst'],connection)
+    #error dato
+    edge = gr.getEdge(analyzer['connections'], connection['\ufefforigin'], connection['destination'])
+    if edge is None:
+        gr.addEdge(analyzer['connections'], connection['\ufefforigin'], connection['destination'], formatKM(connection['cable_length']))
+    return analyzer
+
+def formatKM(cableLength):
+    if(cableLength!='n.a.'):
+        length = cableLength.split(' ')[0]
+        length= length.replace(',', '')
+        return float(length)
+    return 0
+
+def getFirstLandingPoint(analyzer):
+    lpints = m.keySet(analyzer['landingPoints'])
+    entry = m.get(analyzer['landingPoints'],lpints['first']['info'])
+    return entry['value']
+
+def getLastCountry(analyzer):
+    lpints = m.keySet(analyzer['countries'])
+    entry = m.get(analyzer['countries'],lpints['last']['info'])
+    return entry['value']
+    
+
+def getNumberOfConnections(landingPoint,cont):
+    if gr.containsVertex(cont['connections'], landingPoint):
+        return gr.outdegree(cont['connections'],landingPoint)
+    return 0
+
+def getCountry(cont,country):
+    entry = m.get(cont['countries'],country)
+    if entry is not None:
+        country = me.getValue(entry)
+    return None
+
+def getLP(cont,lp):
+    entry=m.get(cont['landingPoints'],lp)
+    if entry is not None:
+        lp=me.getValue(entry)
+    return None
+
+
 
 def addStopConnection(analyzer, lastcable, cable, cable2):
     """
@@ -99,18 +186,6 @@ def addStopConnection(analyzer, lastcable, cable, cable2):
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addStopConnection')
-
-
-def addStop(analyzer, stopid):
-    """
-    Adiciona una estación como un vertice del grafo
-    """
-    try:
-        if not gr.containsVertex(analyzer['connections'], stopid):
-            gr.insertVertex(analyzer['connections'], stopid)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addstop')
 
 
 def addRouteStop(analyzer, service):
@@ -171,13 +246,18 @@ def connectedComponents(analyzer):
     analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
     return scc.connectedComponents(analyzer['components'])
 
+def stronglyConnected(cont,lp1,lp2):
+    kos=scc.KosarajuSCC(cont['connections']) #Creamos un otro grafo desde Kosaraju y desde un grafo
+    z=scc.stronglyConnected(kos, lp1, lp2) #Buscamos si los dos vertices son componentes fuertemente conectados o pertenecen en el mismo cluster
+    x=scc.connectedComponents(kos) #Retorna el numero de componentes fuertemente conectados desde Kosaraju
+    return (z,x)
 
-def minimumCostPaths(analyzer, initialStation):
+def minimumCostPaths(analyzer, lp):
     """
     Calcula los caminos de costo mínimo desde la estacion initialStation
     a todos los demas vertices del grafo
     """
-    analyzer['paths'] = djk.Dijkstra(analyzer['connections'], initialStation)
+    analyzer['paths'] = djk.Dijkstra(analyzer['connections'], lp)
     return analyzer
 
 
@@ -251,26 +331,26 @@ def formatVertex(service):
 # ==============================
 
 
-def compareStopIds(stop, keyvaluestop):
+def compareIds(object, keyvalueObject):
     """
     Compara dos estaciones
     """
-    stopcode = keyvaluestop['key']
-    if (stop == stopcode):
+    objectCode = keyvalueObject['key']
+    if (object == objectCode):
         return 0
-    elif (stop > stopcode):
+    elif (object > objectCode):
         return 1
     else:
         return -1
 
 
-def compareroutes(route1, route2):
+def compareLPoints(lp1, lp2):
     """
     Compara dos rutas
     """
-    if (route1 == route2):
+    if (lp1 == lp2):
         return 0
-    elif (route1 > route2):
+    elif (lp1 > lp2):
         return 1
     else:
         return -1

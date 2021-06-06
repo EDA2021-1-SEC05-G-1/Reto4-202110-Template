@@ -26,6 +26,8 @@ import threading
 from App import controller
 from DISClib.ADT import stack
 assert config
+from DISClib.ADT import map as m
+from DISClib.ADT import list as lt
 
 """
 La vista se encarga de la interacción con el usuario
@@ -54,20 +56,48 @@ def printMenu():
 
 
 def optionTwo(cont):
-    print("\nCargando información de transporte de singapur ....")
-    controller.loadServices(cont, connectionsfile, landing_points_file, countriesfile)
-    numedges = controller.totalConnections(cont)
-    numvertex = controller.totalStops(cont)
-    print('Numero de vertices: ' + str(numvertex))
-    print('Numero de arcos: ' + str(numedges))
-    print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
+    controller.loadData(cont, connectionsfile, landing_points_file, countriesfile)
+    numLP = m.size(cont['landingPoints'])
+    numCountries = m.size(cont['countries'])
+    numConections = controller.totalConnections(cont)
+    print('Total de landing points: '+str(numLP))
+    print('Total de conexiones: '+str(numConections))
+    print('Total de paises: '+str(numCountries))
+    firstLp = controller.getFirstLandingPoint(cont)
+    print('Informacion del primer landing point:')
+    print('     Identificador: '+firstLp['id'])
+    print('     Nombre: '+firstLp['name'])
+    print('     Latitud: '+firstLp['latitude'])
+    print('     Longitud: '+firstLp['longitude'])
+    lastCountry = controller.getLastCountry(cont)
+    print('Informacion del ultimo pais cargado:')
+    print('     Nombre: '+lastCountry['CountryName'])
+    print('     Población: '+lastCountry['Population'])
+    print('     Usuarios de internet: '+lastCountry['Internet users'])
+def optionthree(cont,lp1,lp2):
+    valor=controller.optionthree(cont,lp1,lp2)
+    r1=valor[0]
+    r2=valor[1]
+    if r1==True:
+        print("Los landing points estan en el mismo cluster.")
+    else:
+        print("Los landing points no estan en el mismo cluster.")
+    print("El numero de clusteres presentes en la red son: "+str(r2))
+def optionFour(cont):
+    lst = controller.optionFour(cont)
+    for landingPoint in lt.iterator(lst):
+        print('*'*20)
+        print('Nombre: '+landingPoint['name'])
+        print('Pais: '+landingPoint['country'])
+        print('Id: '+landingPoint['id'])
+        print('# de cables conectados: '+str(landingPoint['conecctions']))
 
-
-def optionThree(cont):
-    print('El número de componentes conectados es: ' +
-          str(controller.connectedComponents(cont)))
-
-
+def optionFive(cont,countryA,countryB):
+    controller.optionFive(cont,countryA,countryB)
+    
+def optionSix(cont,lp):
+    controller.optionSix(cont,lp)
+    print(cont['paths'])
 
 """
 Menu principal
@@ -81,12 +111,25 @@ def thread_cycle():
             print("\nInicializando....")
             # cont es el controlador que se usará de acá en adelante
             cont = controller.init()
-
         elif int(inputs[0]) == 2:
-            optionTwo(cont)
-    else:
-        sys.exit(0)
-sys.exit(0)
+            print("\nCargar información de los landing points...")
+            optionTwo(cont)  
+        elif int(inputs[0])==3:
+            lp1=input("Ingrese el id del primer landing point: ")
+            lp2=input("Ingrese el id del segundo landing point: ")
+            optionthree(cont,lp1,lp2)
+        elif int(inputs[0]) == 4:
+            optionFour(cont)  
+        elif int(inputs[0]) == 5:
+            countryA = input("Pais A: ")
+            countryB = input("Pais B: ")
+            optionFive(cont,countryA,countryB) 
+        elif int(inputs[0]) == 6:
+            lp = input("Landing Point: ")
+            optionSix(cont,lp)
+        else:
+            sys.exit(0)
+    sys.exit(0)
 
 if __name__ == "__main__":
     threading.stack_size(67108864)  # 64MB stack

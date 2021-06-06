@@ -22,7 +22,9 @@
 
 import config as cf
 from App import model
+from DISClib.ADT import map as m
 import csv
+from DISClib.ADT import list as lt
 # ___________________________________________________
 #  Inicializacion del catalogo
 # ___________________________________________________
@@ -43,7 +45,7 @@ def init():
 # ___________________________________________________
 
 
-def loadServices(analyzer, connectionsfile, landing_points_file, countriesfile):
+def loadData(analyzer, connectionsfile, landing_points_file, countriesfile):
     """
     Carga los datos de los archivos CSV en el modelo.
     Se crea un arco entre cada par de estaciones que
@@ -54,26 +56,60 @@ def loadServices(analyzer, connectionsfile, landing_points_file, countriesfile):
     """
     connectionsfile = cf.data_dir + connectionsfile
     input_file1 = csv.DictReader(open(connectionsfile, encoding="utf-8"),
-                                delimiter=",")
+                                 delimiter=",")
     landing_points_file = cf.data_dir + landing_points_file
     input_file2 = csv.DictReader(open(landing_points_file, encoding="utf-8"),
-                                delimiter=",")
+                                 delimiter=",")
     countriesfile = cf.data_dir + countriesfile
     input_file3 = csv.DictReader(open(countriesfile, encoding="utf-8"),
-                                delimiter=",")
+                                 delimiter=",")
 
-    lastcable = None
-    for cable in input_file1:
-        if lastcable is not None:
-            sameservice = lastcable[0]['cable_id'] == cable['cable_id']
-            samedirection = lastcable[0]['destination'] == cable['destination']
-            for cable2 in input_file2:
-                samebusStop = lastcable[1]['landing_point_id'] == cable2['landing_point_id']#Vertice
-            if sameservice and samedirection and not samebusStop:
-                model.addStopConnection(analyzer, lastcable, cable, cable2)
-        lastcable = [cable, cable2]
-    model.addRouteConnections(analyzer)
+    for country in input_file3:
+        model.addCountry(analyzer, country)
+
+    for landingPoint in input_file2:
+        model.addLandingPoint(analyzer, landingPoint)
+
+    for connection in input_file1:
+        model.addConection(analyzer, connection)
+
     return analyzer
+
+def optionthree(cont,lp1,lp2):
+    valor2=model.stronglyConnected(cont, lp1, lp2)
+    return valor2
+def optionFour(cont):
+    lstLandingPoints = m.keySet(cont['landingPoints'])
+    lst = lt.newList()
+    for key in lt.iterator(lstLandingPoints):
+        landingPoint = m.get(cont['landingPoints'], key)['value']
+        noc = model.getNumberOfConnections(key,cont)
+        lt.addLast(lst, {
+                   'name': landingPoint['name'], 'country': landingPoint['country'], 'id': key, 'conecctions': noc})
+    return lst
+
+def optionFive(cont,countryA,countryB):
+    countryA = model.getCountry(cont,countryA)
+    countryB = model.getCountry(cont,countryB)
+    model.minimumCostPaths(cont,countryA)
+
+def optionSix(cont,lp):
+    model.minimumCostPaths(cont,lp)
+
+
+def totalConnections(analyzer):
+    """
+    Total de enlaces entre las paradas
+    """
+    return model.totalConnections(analyzer)
+
+
+def getFirstLandingPoint(analyzer):
+    return model.getFirstLandingPoint(analyzer)
+
+
+def getLastCountry(analyzer):
+    return model.getLastCountry(analyzer)
 
 
 """
