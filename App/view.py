@@ -19,7 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
-
 import sys
 import config
 import threading
@@ -98,7 +97,8 @@ def optionFive(cont,countryA,countryB):
 def optionSix(cont,lp):
     controller.optionSix(cont,lp)
     print(cont['paths'])
-
+def optionSeven(cont,lp):
+    controller.optionSeven(cont,lp)
 """
 Menu principal
 """
@@ -127,6 +127,11 @@ def thread_cycle():
         elif int(inputs[0]) == 6:
             lp = input("Landing Point: ")
             optionSix(cont,lp)
+        elif int(inputs[0]) == 7:
+            lp=input("Landing point: ")
+            optionSeven(cont, lp)
+        elif int(inputs[0])==0:
+            sys.exit(0)
         else:
             sys.exit(0)
     sys.exit(0)

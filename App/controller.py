@@ -96,6 +96,8 @@ def optionFive(cont,countryA,countryB):
 def optionSix(cont,lp):
     model.minimumCostPaths(cont,lp)
 
+def optionSeven(cont,lp):
+    model.optionSeven(cont,lp)
 
 def totalConnections(analyzer):
     """
