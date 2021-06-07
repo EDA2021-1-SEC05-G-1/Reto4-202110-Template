@@ -56,7 +56,8 @@ def printMenu():
 
 
 def optionTwo(cont):
-    controller.loadData(cont, connectionsfile, landing_points_file, countriesfile)
+    answera=controller.loadData(cont, connectionsfile, landing_points_file, countriesfile)
+    cont=answera[0]
     numLP = m.size(cont['landingPoints'])
     numCountries = m.size(cont['countries'])
     numConections = controller.totalConnections(cont)
@@ -74,9 +75,11 @@ def optionTwo(cont):
     print('     Nombre: '+lastCountry['CountryName'])
     print('     Población: '+lastCountry['Population'])
     print('     Usuarios de internet: '+lastCountry['Internet users'])
-
+    print("Tiempo [ms]: ", f"{answera[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answera[2]:.3f}") #Imprime la memoria
 def optionthree(cont,lp1,lp2):
-    valor=controller.optionthree(cont,lp1,lp2)
+    answerb=controller.optionthree(cont,lp1,lp2)
+    valor=answerb[0]
     r1=valor[0]
     r2=valor[1]
     if r1==True:
@@ -84,25 +87,37 @@ def optionthree(cont,lp1,lp2):
     else:
         print("Los landing points no estan en el mismo cluster.")
     print("El numero de clusteres presentes en la red son: "+str(r2))
+    print("Tiempo [ms]: ", f"{answerb[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answerb[2]:.3f}") #Imprime la memoria
     
 def optionFour(cont):
-    lst = controller.optionFour(cont)
+    answerc = controller.optionFour(cont)
+    lst=answerc[0]
     for landingPoint in lt.iterator(lst):
         print('*'*20)
         print('Nombre: '+landingPoint['name'])
         print('Pais: '+landingPoint['country'])
         print('Id: '+landingPoint['id'])
         print('# de cables conectados: '+str(landingPoint['conecctions']))
+    print("Tiempo [ms]: ", f"{answerc[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answerc[2]:.3f}") #Imprime la memoria
 
 def optionFive(cont,countryA,countryB):
-    controller.optionFive(cont,countryA,countryB)
-
+    answerd=controller.optionFive(cont,countryA,countryB)
+    print(answerd[0])
+    print("Tiempo [ms]: ", f"{answerd[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answerd[2]:.3f}") #Imprime la memoria
 def optionSix(cont,lp):
-    controller.optionSix(cont,lp)
+    answere=controller.optionSix(cont,lp)
     print(cont['paths'])
 
+    print("Tiempo [ms]: ", f"{answere[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answere[2]:.3f}") #Imprime la memoria
 def optionSeven(cont,lp):
-    controller.optionSeven(cont,lp)
+    answerf=controller.optionSeven(cont,lp)
+
+    print("Tiempo [ms]: ", f"{answerf[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answerf[2]:.3f}") #Imprime la memoria
 """
 Menu principal
 """
@@ -114,7 +129,10 @@ def thread_cycle():
         if int(inputs[0]) == 1:
             print("\nInicializando....")
             # cont es el controlador que se usará de acá en adelante
-            cont = controller.init()
+            answer = controller.init()
+            cont=answer[0]
+            print("Tiempo [ms]: ", f"{answer[1]:.3f}", "  ||  ", #Imprime el tiempo
+              "Memoria [kB]: ", f"{answer[2]:.3f}") #Imprime la memoria
         elif int(inputs[0]) == 2:
             print("\nCargar información de los landing points...")
             optionTwo(cont)  
