@@ -33,7 +33,7 @@ from DISClib.ADT import list as lt
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
-from DISClib.Algorithms.Graphs import bfs 
+from DISClib.Algorithms.Graphs import bfs
 assert config
 
 """
@@ -163,7 +163,6 @@ def getLP(cont,lp):
     return None
 
 
-
 def addStopConnection(analyzer, lastcable, cable, cable2):
     """
     Adiciona las estaciones al grafo como vertices y arcos entre las
@@ -239,6 +238,20 @@ def addConnection(analyzer, origin, destination, distance):
 # ==============================
 
 
+def stronglyConnected(cont,lp1,lp2):
+    kos=scc.KosarajuSCC(cont['connections']) #Creamos un otro grafo desde Kosaraju y desde un grafo
+    z=scc.stronglyConnected(kos, lp1, lp2) #Buscamos si los dos vertices son componentes fuertemente conectados o pertenecen en el mismo cluster
+    x=scc.connectedComponents(kos) #Retorna el numero de componentes fuertemente conectados desde Kosaraju
+    return (z,x)
+
+
+def optionSeven(cont,lp):
+    b=bfs.BreadhtFisrtSearch(cont['connections'], lp) #Hacer un befs a partir del landing point
+    bs=bfs.bfsVertex(b, cont['connections'], lp)#Hacer un bfs y mirar los componentes que estan conectados con el landing point
+    tam=bs['visited']['size']
+    print(tam)
+    return tam
+
 def connectedComponents(analyzer):
     """
     Calcula los componentes conectados del grafo
@@ -247,17 +260,6 @@ def connectedComponents(analyzer):
     analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
     return scc.connectedComponents(analyzer['components'])
 
-def stronglyConnected(cont,lp1,lp2):
-    kos=scc.KosarajuSCC(cont['connections']) #Creamos un otro grafo desde Kosaraju y desde un grafo
-    z=scc.stronglyConnected(kos, lp1, lp2) #Buscamos si los dos vertices son componentes fuertemente conectados o pertenecen en el mismo cluster
-    x=scc.connectedComponents(kos) #Retorna el numero de componentes fuertemente conectados desde Kosaraju
-    return (z,x)
-
-def optionSeven(cont,lp):
-    b=bfs.BreadhtFisrtSearch(cont['connections'], lp) #Hacer un befs a partir del landing point
-    bs=bfs.bfsVertex(b, cont['connections'], lp)#Hacer un bfs y mirar los componentes que estan conectados con el landing point
-    tam=bs['visited']['size']
-    return tam
 
 def minimumCostPaths(analyzer, lp):
     """
@@ -378,3 +380,4 @@ los mismos.
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
+

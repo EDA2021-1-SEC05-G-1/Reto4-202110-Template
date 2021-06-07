@@ -78,6 +78,7 @@ def loadData(analyzer, connectionsfile, landing_points_file, countriesfile):
 def optionthree(cont,lp1,lp2):
     valor2=model.stronglyConnected(cont, lp1, lp2)
     return valor2
+
 def optionFour(cont):
     lstLandingPoints = m.keySet(cont['landingPoints'])
     lst = lt.newList()
@@ -95,9 +96,10 @@ def optionFive(cont,countryA,countryB):
 
 def optionSix(cont,lp):
     model.minimumCostPaths(cont,lp)
-
+    
 def optionSeven(cont,lp):
     model.optionSeven(cont,lp)
+
 
 def totalConnections(analyzer):
     """

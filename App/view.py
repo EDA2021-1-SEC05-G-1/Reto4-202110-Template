@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
+
 import sys
 import config
 import threading
@@ -73,6 +74,7 @@ def optionTwo(cont):
     print('     Nombre: '+lastCountry['CountryName'])
     print('     Población: '+lastCountry['Population'])
     print('     Usuarios de internet: '+lastCountry['Internet users'])
+
 def optionthree(cont,lp1,lp2):
     valor=controller.optionthree(cont,lp1,lp2)
     r1=valor[0]
@@ -82,6 +84,7 @@ def optionthree(cont,lp1,lp2):
     else:
         print("Los landing points no estan en el mismo cluster.")
     print("El numero de clusteres presentes en la red son: "+str(r2))
+    
 def optionFour(cont):
     lst = controller.optionFour(cont)
     for landingPoint in lt.iterator(lst):
@@ -93,10 +96,11 @@ def optionFour(cont):
 
 def optionFive(cont,countryA,countryB):
     controller.optionFive(cont,countryA,countryB)
-    
+
 def optionSix(cont,lp):
     controller.optionSix(cont,lp)
     print(cont['paths'])
+
 def optionSeven(cont,lp):
     controller.optionSeven(cont,lp)
 """
